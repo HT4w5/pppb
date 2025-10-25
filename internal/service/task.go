@@ -1,7 +1,7 @@
 package service
 
 import (
-	"fmt"
+	"log"
 	"os"
 	"os/exec"
 
@@ -14,12 +14,12 @@ func runTask(task model.PPPTask, results chan<- model.PPPResult) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	fmt.Printf("[%s] STARTING process (PID: %d).\n", task.Tag, os.Getpid())
+	log.Printf("[%s] STARTING process (PID: %d).\n", task.Tag, os.Getpid())
 
 	err := cmd.Run()
 
 	if err != nil {
-		fmt.Printf("[%s] ERROR: Process failed. Error: %s\n", task.Tag, err.Error())
+		log.Printf("[%s] ERROR: Process failed. Error: %s\n", task.Tag, err.Error())
 		results <- model.PPPResult{
 			Tag:     task.Tag,
 			Success: false,
@@ -28,7 +28,7 @@ func runTask(task model.PPPTask, results chan<- model.PPPResult) {
 		return
 	}
 
-	fmt.Printf("[%s] FINISHED successfully.\n", task.Tag)
+	log.Printf("[%s] FINISHED successfully.\n", task.Tag)
 	results <- model.PPPResult{
 		Tag:     task.Tag,
 		Success: true,
