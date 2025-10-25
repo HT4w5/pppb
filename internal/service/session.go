@@ -14,23 +14,23 @@ func runTask(task model.PPPTask, results chan<- model.PPPResult) {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	fmt.Printf("[%s] STARTING process (PID: %d).\n", task.Name, os.Getpid())
+	fmt.Printf("[%s] STARTING process (PID: %d).\n", task.Tag, os.Getpid())
 
 	err := cmd.Run()
 
 	if err != nil {
-		fmt.Printf("[%s] ERROR: Process failed. Error: %s\n", task.Name, err.Error())
+		fmt.Printf("[%s] ERROR: Process failed. Error: %s\n", task.Tag, err.Error())
 		results <- model.PPPResult{
-			Name:    task.Name,
+			Tag:     task.Tag,
 			Success: false,
 			Error:   err,
 		}
 		return
 	}
 
-	fmt.Printf("[%s] FINISHED successfully.\n", task.Name)
+	fmt.Printf("[%s] FINISHED successfully.\n", task.Tag)
 	results <- model.PPPResult{
-		Name:    task.Name,
+		Tag:     task.Tag,
 		Success: true,
 		Error:   nil,
 	}

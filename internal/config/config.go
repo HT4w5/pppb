@@ -11,6 +11,7 @@ type Config struct {
 }
 
 type ConnectionConfig struct {
+	Tag      string `json:"tag"`
 	TTYName  string `json:"ttyname"`
 	User     string `json:"user"`
 	Password string `json:"password"`

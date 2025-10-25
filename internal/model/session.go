@@ -5,13 +5,13 @@ const (
 )
 
 type PPPTask struct {
-	Name   string   `yaml:"name"`
-	Comand string   `yaml:"command"`
-	Args   []string `yaml:"args"`
+	Tag    string
+	Comand string
+	Args   []string
 }
 
 type PPPResult struct {
-	Name    string
+	Tag     string
 	Success bool
 	Error   error
 }
