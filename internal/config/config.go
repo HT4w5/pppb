@@ -1,10 +1,9 @@
 package config
 
 import (
+	"encoding/json"
 	"log"
 	"os"
-
-	"gopkg.in/yaml.v2"
 )
 
 type Config struct {
@@ -30,7 +29,7 @@ func (c *Config) Load(config string) {
 		log.Panicf("Failed to open config: %s, %v", config, err)
 	}
 
-	if err := yaml.Unmarshal(configBytes, &c); err != nil {
+	if err := json.Unmarshal(configBytes, &c); err != nil {
 		log.Panicf("Failed to parse config: %s, %v", config, err)
 	}
 }
