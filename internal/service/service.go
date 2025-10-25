@@ -25,7 +25,7 @@ func New(cfg *config.Config) *Service {
 
 func (s *Service) init() {
 	// Convert ConnectionConfigs to PPPTasks
-	tasks := make([]*model.PPPTask, len(s.cfg.Connections))
+	tasks := make([]*model.PPPTask, 0, len(s.cfg.Connections))
 
 	for _, c := range s.cfg.Connections {
 		tasks = append(tasks, c.ToPPPTask())
