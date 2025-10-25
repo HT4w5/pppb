@@ -1,7 +1,7 @@
 package model
 
 const (
-	pppdCommand = "pppd"
+	PPPDefaultCommand = "pppd"
 )
 
 type PPPTask struct {
