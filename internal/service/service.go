@@ -24,10 +24,15 @@ func New(cfg *config.Config) *Service {
 }
 
 func (s *Service) init() {
+	// Convert ConnectionConfigs to PPPTasks
+	tasks := make([]*model.PPPTask, len(s.cfg.Connections))
 
+	for _, c := range s.cfg.Connections {
+		tasks = append(tasks, c.ToPPPTask())
+	}
 }
 
-func (s *Service) runAll() {
+func (s *Service) RunAll() {
 	s.logger.Println("Starting all tasks.")
 
 	results := make(chan model.PPPResult)
@@ -49,5 +54,5 @@ func (s *Service) runAll() {
 		}
 	}
 
-	s.logger.Println("All tasks ended. %d/%d successful.", len(s.tasks), successCount)
+	s.logger.Printf("All tasks ended. %d/%d successful.", len(s.tasks), successCount)
 }

@@ -55,7 +55,7 @@ type ConnectionConfig struct {
 	IFName   string `json:"ifname"`
 }
 
-func (c *ConnectionConfig) toPPPTask() *model.PPPTask {
+func (c *ConnectionConfig) ToPPPTask() *model.PPPTask {
 	task := &model.PPPTask{
 		Comand: model.PPPDefaultCommand,
 		Tag:    c.Tag,
