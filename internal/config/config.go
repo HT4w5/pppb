@@ -7,23 +7,20 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-const (
-	pppdCommand = "pppd"
-)
-
 type Config struct {
-	Sessions []*SessionConfig `yaml:"sessions"`
+	Connections []*ConnectionConfig `json:"connections"`
 }
 
-type SessionConfig struct {
-	Name   string   `yaml:"name"`
-	Comand string   `yaml:"command"`
-	Args   []string `yaml:"args"`
+type ConnectionConfig struct {
+	TTYName  string `json:"ttyname"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	IFName   string `json:"ifname"`
 }
 
 func New() *Config {
 	return &Config{
-		[]*SessionConfig{},
+		[]*ConnectionConfig{},
 	}
 }
 
@@ -35,10 +32,5 @@ func (c *Config) Load(config string) {
 
 	if err := yaml.Unmarshal(configBytes, &c); err != nil {
 		log.Panicf("Failed to parse config: %s, %v", config, err)
-	}
-
-	// Use default pppd command
-	for _, s := range c.Sessions {
-		s.Comand = pppdCommand
 	}
 }
