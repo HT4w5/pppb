@@ -36,10 +36,14 @@ func (s *Service) RunAll() {
 	s.logger.Println("Starting all tasks.")
 
 	results := make(chan model.PPPResult)
+	startSignal := make(chan struct{})
 
+	// Spawn tasks
 	for _, task := range s.tasks {
-		go runTask(*task, results)
+		go runTask(*task, startSignal, results)
 	}
+	// Send start signal
+	close(startSignal)
 
 	s.logger.Println("Waiting for tasks to finish...")
 	successCount := 0
@@ -54,5 +58,5 @@ func (s *Service) RunAll() {
 		}
 	}
 
-	s.logger.Printf("All tasks ended. %d/%d successful.", len(s.tasks), successCount)
+	s.logger.Printf("All tasks ended. %d/%d successful.", successCount, len(s.tasks))
 }

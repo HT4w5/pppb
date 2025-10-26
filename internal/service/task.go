@@ -8,7 +8,10 @@ import (
 	"github.com/HT4w5/pppb/internal/model"
 )
 
-func runTask(task model.PPPTask, results chan<- model.PPPResult) {
+func runTask(task model.PPPTask, startSignal <-chan struct{}, results chan<- model.PPPResult) {
+	// Block until start signal
+	<-startSignal
+
 	cmd := exec.Command(task.Comand, task.Args...)
 
 	cmd.Stdout = os.Stdout
