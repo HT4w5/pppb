@@ -1,7 +1,6 @@
 package service
 
 import (
-	"log"
 	"os"
 	"os/exec"
 
@@ -17,12 +16,9 @@ func runPPPTask(task model.PPPTask, startSignal <-chan struct{}, results chan<- 
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	log.Printf("[%s] STARTING dial\n", task.Tag)
-
 	err := cmd.Run()
 
 	if err != nil {
-		log.Printf("[%s] ERROR: Process failed: %s\n", task.Tag, err.Error())
 		results <- model.PPPResult{
 			Tag:     task.Tag,
 			Success: false,
@@ -31,7 +27,6 @@ func runPPPTask(task model.PPPTask, startSignal <-chan struct{}, results chan<- 
 		return
 	}
 
-	log.Printf("[%s] FINISHED successfully.\n", task.Tag)
 	results <- model.PPPResult{
 		Tag:     task.Tag,
 		Success: true,
