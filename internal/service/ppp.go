@@ -8,7 +8,7 @@ import (
 	"github.com/HT4w5/pppb/internal/model"
 )
 
-func runTask(task model.PPPTask, startSignal <-chan struct{}, results chan<- model.PPPResult) {
+func runPPPTask(task model.PPPTask, startSignal <-chan struct{}, results chan<- model.PPPResult) {
 	// Block until start signal
 	<-startSignal
 
@@ -17,12 +17,12 @@ func runTask(task model.PPPTask, startSignal <-chan struct{}, results chan<- mod
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 
-	log.Printf("[%s] STARTING process (PID: %d).\n", task.Tag, os.Getpid())
+	log.Printf("[%s] STARTING dial\n", task.Tag)
 
 	err := cmd.Run()
 
 	if err != nil {
-		log.Printf("[%s] ERROR: Process failed. Error: %s\n", task.Tag, err.Error())
+		log.Printf("[%s] ERROR: Process failed: %s\n", task.Tag, err.Error())
 		results <- model.PPPResult{
 			Tag:     task.Tag,
 			Success: false,

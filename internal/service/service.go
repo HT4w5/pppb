@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/HT4w5/pppb/internal/config"
@@ -10,7 +9,7 @@ import (
 
 type Service struct {
 	cfg    *config.Config
-	tasks  []*model.PPPTask
+	tasks  map[string]*model.PPPTask
 	logger *log.Logger
 }
 
@@ -25,38 +24,34 @@ func New(cfg *config.Config) *Service {
 
 func (s *Service) init() {
 	// Convert ConnectionConfigs to PPPTasks
-	s.tasks = make([]*model.PPPTask, 0, len(s.cfg.Connections))
+	s.tasks = map[string]*model.PPPTask{}
 
 	for _, c := range s.cfg.Connections {
-		s.tasks = append(s.tasks, c.ToPPPTask())
+		s.tasks[c.Tag] = c.ToPPPTask()
 	}
 }
 
-func (s *Service) RunAll() {
-	s.logger.Println("Starting all tasks.")
+func (s *Service) RunAllPPPTasks() {
+	s.logger.Println("Starting all ppp tasks.")
 
 	results := make(chan model.PPPResult)
 	startSignal := make(chan struct{})
 
 	// Spawn tasks
 	for _, task := range s.tasks {
-		go runTask(*task, startSignal, results)
+		go runPPPTask(*task, startSignal, results)
 	}
 	// Send start signal
 	close(startSignal)
 
-	s.logger.Println("Waiting for tasks to finish...")
+	s.logger.Println("Waiting for ppp tasks to finish...")
 	successCount := 0
 
 	for i := 0; i < len(s.tasks); i++ {
 		result := <-results
 		if result.Success {
-			fmt.Printf("Task '%s' launched and completed successfully.\n", result.Tag)
 			successCount++
-		} else {
-			fmt.Printf("Task '%s' failed. Error: %v\n", result.Tag, result.Error)
 		}
 	}
-
-	s.logger.Printf("All tasks ended. %d/%d successful.", successCount, len(s.tasks))
+	s.logger.Printf("All ppp tasks ended. %d/%d successful.", successCount, len(s.tasks))
 }

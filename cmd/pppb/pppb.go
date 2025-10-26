@@ -15,5 +15,5 @@ func main() {
 	}
 
 	svc := service.New(cfg)
-	svc.RunAll()
+	svc.RunAllPPPTasks()
 }
