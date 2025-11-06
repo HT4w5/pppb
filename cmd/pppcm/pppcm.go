@@ -60,7 +60,7 @@ func main() {
 	logger.Printf("[main] daemon enabled\n")
 	i := MinRetryInterval
 	for !svc.CheckAndRestart() {
-		logger.Printf("[main] checking in %ds\n", i)
+		logger.Printf("[main] (re)checking in %ds\n", i)
 		time.Sleep(time.Duration(i) * time.Second)
 		i = intervalFallback(i)
 	}
@@ -79,7 +79,7 @@ func main() {
 				case <-checkTicker.C:
 					i := MinRetryInterval
 					for !svc.CheckAndRestart() {
-						logger.Printf("[main] checking in %ds\n", i)
+						logger.Printf("[main] (re)checking in %ds\n", i)
 						time.Sleep(time.Duration(i) * time.Second)
 						i = intervalFallback(i)
 					}
@@ -101,7 +101,7 @@ func main() {
 					i := MinRetryInterval
 					for !svc.CheckAndRestart() {
 						restart = time.Now()
-						logger.Printf("[main] checking in %ds\n", i)
+						logger.Printf("[main] (re)checking in %ds\n", i)
 						time.Sleep(time.Duration(i) * time.Second)
 						i = intervalFallback(i)
 					}
@@ -114,7 +114,7 @@ func main() {
 						i := MinRetryInterval
 						for !svc.CheckAndRestart() {
 							restart = time.Now()
-							logger.Printf("[main] checking in %ds\n", i)
+							logger.Printf("[main] (re)checking in %ds\n", i)
 							time.Sleep(time.Duration(i) * time.Second)
 							i = intervalFallback(i)
 						}

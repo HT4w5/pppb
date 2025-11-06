@@ -62,7 +62,7 @@ func (s *Service) CheckAllLinks() int {
 				continue
 			}
 		}
-		s.logger.Printf("[%s] link down\n", k)
+		s.logger.Printf("[%s] link down: %v\n", k, err)
 		v.Up = false
 		v.PID = 0
 	}
