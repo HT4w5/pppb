@@ -17,6 +17,7 @@ type PPPResult struct {
 }
 
 type PPPLink struct {
+	PID    int
 	Tag    string
 	Task   *PPPTask
 	Up     bool
