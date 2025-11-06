@@ -15,5 +15,6 @@ func main() {
 	}
 
 	svc := service.New(cfg)
-	svc.StartAllPPPTasks()
+	//svc.StartAllPPPTasks()
+	svc.CheckAllLinks()
 }

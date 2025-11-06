@@ -3,11 +3,13 @@ package service
 import (
 	"os"
 	"os/exec"
+	"strconv"
+	"strings"
 
 	"github.com/HT4w5/pppcm/internal/model"
 )
 
-func (s *Service) StartAllPPPTasks() {
+func (s *Service) StartAllPPPTasks() int {
 	s.logger.Println("[main] Starting all pppd tasks")
 
 	results := make(chan model.PPPResult)
@@ -33,11 +35,33 @@ func (s *Service) StartAllPPPTasks() {
 			s.logger.Printf("[%s] failed to start: %v\n", result.Tag, result.Error)
 		}
 	}
-	s.logger.Printf("[main] All pppd tasks ended. %d/%d successful", successCount, len(s.links))
+	s.logger.Printf("[main] All pppd tasks ended. %d/%d successful\n", successCount, len(s.links))
+	return successCount
 }
 
-func (s *Service) CheckAllLinks() {
+func (s *Service) CheckAllLinks() int {
 	s.logger.Println("[main] Checking all ppp links")
+
+	upCount := 0
+	for k, v := range s.links {
+		pidBytes, err := os.ReadFile(s.cfg.Health.RunDir + "/" + v.IFName + ".pid")
+		if err == nil {
+			pidStr := strings.TrimSpace(string(pidBytes))
+			pid, err := strconv.Atoi(pidStr)
+			if err == nil {
+				s.logger.Printf("[%s] link up, pid %d, iface %s\n", k, pid, v.IFName)
+				v.Up = true
+				v.PID = pid
+				upCount++
+				continue
+			}
+		}
+		s.logger.Printf("[%s] link down\n", k)
+		v.Up = false
+		v.PID = 0
+	}
+	s.logger.Printf("[main] %d/%d links up\n", upCount, len(s.links))
+	return upCount
 }
 
 func runPPPTask(task model.PPPTask, startSignal <-chan struct{}, results chan<- model.PPPResult) {

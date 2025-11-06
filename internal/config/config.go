@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/HT4w5/pppcm/internal/model"
 )
@@ -35,6 +36,9 @@ func (c *Config) Load(config string) error {
 	if err := json.Unmarshal(configBytes, &c); err != nil {
 		return fmt.Errorf("Failed to parse config: %s, %w", config, err)
 	}
+
+	// Strip suffix
+	c.Health.RunDir = strings.TrimSuffix(c.Health.RunDir, "/")
 
 	if err := c.validate(); err != nil {
 		return fmt.Errorf("Failed to validate config: %s, %w", config, err)
