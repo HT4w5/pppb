@@ -13,10 +13,10 @@ type Service struct {
 	logger *log.Logger
 }
 
-func New(cfg *config.Config) *Service {
+func New(cfg *config.Config, l *log.Logger) *Service {
 	s := &Service{
 		cfg:    cfg,
-		logger: log.Default(),
+		logger: l,
 	}
 	s.init()
 	return s
@@ -34,4 +34,18 @@ func (s *Service) init() {
 			IFName: c.IFName,
 		}
 	}
+}
+
+// Check links, if less than expected, restart all, return false.
+// If equal or more, return true.
+func (s *Service) CheckAndRestart() bool {
+	upCount := s.CheckAllLinks()
+	if upCount >= s.cfg.Health.Expected {
+		s.logger.Printf("[service] %d links up, satisfies expected %d\n", upCount, s.cfg.Health.Expected)
+		return true
+	}
+	s.logger.Printf("[service] %d links up, less than expected %d\n", upCount, s.cfg.Health.Expected)
+	s.StopAllLinks()
+	s.StartAllPPPTasks()
+	return false
 }

@@ -55,8 +55,13 @@ func (c *Config) validate() error {
 			return fmt.Errorf("Can't open runtime variable directory %s: %w", c.Health.RunDir, err)
 		}
 
+		// Expected
+		if c.Health.Expected > len(c.Links) {
+			return fmt.Errorf("Expected (%d) greater than number of links (%d)", c.Health.Expected, len(c.Links))
+		}
+
 		// Intervals
-		if c.Health.CheckInterval < 300 {
+		if c.Health.CheckInterval < 0 {
 			return fmt.Errorf("Invalid CheckInterval %v, must be equal to or greater than 300", c.Health.CheckInterval)
 		}
 
