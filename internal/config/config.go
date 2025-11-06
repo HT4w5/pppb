@@ -9,12 +9,14 @@ import (
 )
 
 type Config struct {
-	Links []*LinkConfig `json:"links"`
+	Links  []*LinkConfig `json:"links"`
+	RunDir string        `json:"run_dir"`
 }
 
 func New() *Config {
 	return &Config{
-		[]*LinkConfig{},
+		Links:  []*LinkConfig{},
+		RunDir: "/var/run",
 	}
 }
 
@@ -36,6 +38,12 @@ func (c *Config) Load(config string) error {
 }
 
 func (c *Config) validate() error {
+	// Runtime variable directory
+	_, err := os.ReadDir(c.RunDir)
+	if err != nil {
+		return fmt.Errorf("Can't open runtime variable directory %s: %w", c.RunDir, err)
+	}
+	// Links
 	for _, cc := range c.Links {
 		if len(cc.Tag) == 0 {
 			return fmt.Errorf("Link with no tag present")
