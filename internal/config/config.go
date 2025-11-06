@@ -52,34 +52,50 @@ func (c *Config) validate() error {
 		// Runtime variable directory
 		_, err := os.ReadDir(c.Health.RunDir)
 		if err != nil {
-			return fmt.Errorf("Can't open runtime variable directory %s: %w", c.Health.RunDir, err)
+			return fmt.Errorf("can't open runtime variable directory %s: %w", c.Health.RunDir, err)
 		}
 
 		// Expected
 		if c.Health.Expected > len(c.Links) {
-			return fmt.Errorf("Expected (%d) greater than number of links (%d)", c.Health.Expected, len(c.Links))
+			return fmt.Errorf("expected (%d) greater than number of links (%d)", c.Health.Expected, len(c.Links))
 		}
 
 		// Intervals
 		if c.Health.CheckInterval < 0 {
-			return fmt.Errorf("Invalid CheckInterval %v, must be equal to or greater than 300", c.Health.CheckInterval)
+			return fmt.Errorf("invalid CheckInterval %v, must be equal to or greater than 300", c.Health.CheckInterval)
 		}
 
 		if c.Health.ForceRestart {
 			if c.Health.ForceRestartInterval < c.Health.CheckInterval {
-				return fmt.Errorf("Invalid ForceRestartInterval %v, must be equal to or greater than CheckInterval (%v)", c.Health.ForceRestartInterval, c.Health.CheckInterval)
+				return fmt.Errorf("invalid ForceRestartInterval %v, must be equal to or greater than CheckInterval (%v)", c.Health.ForceRestartInterval, c.Health.CheckInterval)
 			}
 		}
 	}
 
 	// Links
+	numLinks := len(c.Links)
+	tags := make(map[string]struct{}, numLinks)
+	ttynames := make(map[string]struct{}, numLinks)
+	ifnames := make(map[string]struct{}, numLinks)
 	for _, cc := range c.Links {
 		if len(cc.Tag) == 0 {
-			return fmt.Errorf("Link with no tag present")
+			return fmt.Errorf("link with no tag present")
 		}
 		if len(cc.TTYName) == 0 || len(cc.User) == 0 || len(cc.Password) == 0 || len(cc.IFName) == 0 {
-			return fmt.Errorf("Invalid link: %s", cc.Tag)
+			return fmt.Errorf("invalid link: %s", cc.Tag)
 		}
+		tags[cc.Tag] = struct{}{}
+		ttynames[cc.TTYName] = struct{}{}
+		ifnames[cc.IFName] = struct{}{}
+	}
+	if len(tags) != numLinks {
+		return fmt.Errorf("duplicate link tags")
+	}
+	if len(ttynames) != numLinks {
+		return fmt.Errorf("duplicate link ttynames")
+	}
+	if len(ifnames) != numLinks {
+		return fmt.Errorf("duplicate link ifnames")
 	}
 	return nil
 }
