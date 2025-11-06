@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/HT4w5/pppb/internal/config"
-	"github.com/HT4w5/pppb/internal/service"
+	"github.com/HT4w5/pppcm/internal/config"
+	"github.com/HT4w5/pppcm/internal/service"
 )
 
 func main() {
@@ -15,5 +15,5 @@ func main() {
 	}
 
 	svc := service.New(cfg)
-	svc.RunAllPPPTasks()
+	svc.StartAllPPPTasks()
 }

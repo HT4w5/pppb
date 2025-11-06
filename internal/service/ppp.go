@@ -4,7 +4,7 @@ import (
 	"os"
 	"os/exec"
 
-	"github.com/HT4w5/pppb/internal/model"
+	"github.com/HT4w5/pppcm/internal/model"
 )
 
 func runPPPTask(task model.PPPTask, startSignal <-chan struct{}, results chan<- model.PPPResult) {

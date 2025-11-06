@@ -5,16 +5,16 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/HT4w5/pppb/internal/model"
+	"github.com/HT4w5/pppcm/internal/model"
 )
 
 type Config struct {
-	Connections []*ConnectionConfig `json:"connections"`
+	Links []*LinkConfig `json:"links"`
 }
 
 func New() *Config {
 	return &Config{
-		[]*ConnectionConfig{},
+		[]*LinkConfig{},
 	}
 }
 
@@ -36,18 +36,18 @@ func (c *Config) Load(config string) error {
 }
 
 func (c *Config) validate() error {
-	for _, cc := range c.Connections {
+	for _, cc := range c.Links {
 		if len(cc.Tag) == 0 {
-			return fmt.Errorf("Connection with no tag present")
+			return fmt.Errorf("Link with no tag present")
 		}
 		if len(cc.TTYName) == 0 || len(cc.User) == 0 || len(cc.Password) == 0 || len(cc.IFName) == 0 {
-			return fmt.Errorf("Invalid connection: %s", cc.Tag)
+			return fmt.Errorf("Invalid link: %s", cc.Tag)
 		}
 	}
 	return nil
 }
 
-type ConnectionConfig struct {
+type LinkConfig struct {
 	Tag      string `json:"tag"`
 	TTYName  string `json:"ttyname"`
 	User     string `json:"user"`
@@ -55,7 +55,7 @@ type ConnectionConfig struct {
 	IFName   string `json:"ifname"`
 }
 
-func (c *ConnectionConfig) ToPPPTask() *model.PPPTask {
+func (c *LinkConfig) ToPPPTask() *model.PPPTask {
 	task := &model.PPPTask{
 		Comand: model.PPPDefaultCommand,
 		Tag:    c.Tag,
@@ -64,7 +64,7 @@ func (c *ConnectionConfig) ToPPPTask() *model.PPPTask {
 	return task
 }
 
-func (c *ConnectionConfig) getArgs() []string {
+func (c *LinkConfig) getArgs() []string {
 	return []string{
 		"plugin",
 		"pppoe.so",

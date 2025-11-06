@@ -16,10 +16,9 @@ type PPPResult struct {
 	Error   error
 }
 
-type PPPConnection struct {
-	Tag     string
-	Task    *PPPTask
-	Up      bool // Created in the first place
-	Healthy bool // Ping success
-	IFName  string
+type PPPLink struct {
+	Tag    string
+	Task   *PPPTask
+	Up     bool
+	IFName string
 }
