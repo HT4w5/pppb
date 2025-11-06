@@ -17,6 +17,9 @@ const (
 	VersionY = 0
 	VersionZ = 1
 	Build    = "unknown"
+
+	MinRetryInterval = 10   // 10s
+	MaxRetryInterval = 1200 // 2m
 )
 
 func Version() string {
@@ -38,48 +41,55 @@ func main() {
 	logger := log.Default()
 	svc := service.New(cfg, logger)
 
+	// Stop existing links
 	logger.Printf("[main] stopping existing links\n")
 	svc.CheckAllLinks()
 	svc.StopAllLinks()
 	time.Sleep(5 * time.Second)
 
-	if !cfg.Health.Enabled {
+	// Daemon disabled
+	if !cfg.Daemon.Enabled {
 		// One shot start
-		logger.Printf("[main] health disabled\n")
+		logger.Printf("[main] daemon disabled\n")
 		svc.StartAllPPPTasks()
 		logger.Printf("[main] exiting...\n")
 		return
 	}
 
-	logger.Printf("[main] health enabled\n")
+	// Daemon enabled
+	logger.Printf("[main] daemon enabled\n")
+	i := MinRetryInterval
 	for !svc.CheckAndRestart() {
-		logger.Printf("[main] checking in 10s\n")
-		time.Sleep(10 * time.Second)
+		logger.Printf("[main] checking in %ds\n", i)
+		time.Sleep(time.Duration(i) * time.Second)
+		i = intervalFallback(i)
 	}
-	logger.Printf("[main] start success. Checking in %ds\n", cfg.Health.CheckInterval)
+	logger.Printf("[main] start success. Checking in %ds\n", cfg.Daemon.CheckInterval)
 
-	checkInterval := time.Duration(cfg.Health.CheckInterval) * time.Second
+	checkInterval := time.Duration(cfg.Daemon.CheckInterval) * time.Second
 	checkTicker := time.NewTicker(checkInterval)
 	done := make(chan os.Signal, 1)
 
-	if !cfg.Health.ForceRestart {
+	if !cfg.Daemon.ForceRestart {
 		go func() {
 			for {
 				select {
 				case <-done:
 					return
 				case <-checkTicker.C:
+					i := MinRetryInterval
 					for !svc.CheckAndRestart() {
-						logger.Printf("[main] checking in 10s\n")
-						time.Sleep(10 * time.Second)
+						logger.Printf("[main] checking in %ds\n", i)
+						time.Sleep(time.Duration(i) * time.Second)
+						i = intervalFallback(i)
 					}
-					logger.Printf("[main] check success. Waiting %ds\n", cfg.Health.CheckInterval)
+					logger.Printf("[main] check success. Waiting %ds\n", cfg.Daemon.CheckInterval)
 					checkTicker.Reset(checkInterval)
 				}
 			}
 		}()
 	} else {
-		forceRestartInterval := time.Duration(cfg.Health.ForceRestartInterval) * time.Second
+		forceRestartInterval := time.Duration(cfg.Daemon.ForceRestartInterval) * time.Second
 		forceRestartTicker := time.NewTicker(forceRestartInterval)
 		go func() {
 			restart := time.Now()
@@ -88,25 +98,29 @@ func main() {
 				case <-done:
 					return
 				case <-checkTicker.C:
+					i := MinRetryInterval
 					for !svc.CheckAndRestart() {
 						restart = time.Now()
-						logger.Printf("[main] checking in 10s\n")
-						time.Sleep(10 * time.Second)
+						logger.Printf("[main] checking in %ds\n", i)
+						time.Sleep(time.Duration(i) * time.Second)
+						i = intervalFallback(i)
 					}
-					logger.Printf("[main] check success. Waiting %ds\n", cfg.Health.CheckInterval)
+					logger.Printf("[main] check success. Waiting %ds\n", cfg.Daemon.CheckInterval)
 					checkTicker.Reset(checkInterval)
 				case <-forceRestartTicker.C:
 					if time.Since(restart) > forceRestartInterval {
 						logger.Printf("[main] force restart\n")
 						svc.StartAllPPPTasks()
+						i := MinRetryInterval
 						for !svc.CheckAndRestart() {
 							restart = time.Now()
-							logger.Printf("[main] checking in 10s\n")
-							time.Sleep(10 * time.Second)
+							logger.Printf("[main] checking in %ds\n", i)
+							time.Sleep(time.Duration(i) * time.Second)
+							i = intervalFallback(i)
 						}
 						checkTicker.Reset(checkInterval)
 						forceRestartTicker.Reset(forceRestartInterval)
-						logger.Printf("[main] force restart success. Waiting %ds\n", cfg.Health.ForceRestartInterval)
+						logger.Printf("[main] force restart success. Waiting %ds\n", cfg.Daemon.ForceRestartInterval)
 					}
 				}
 			}
@@ -116,4 +130,13 @@ func main() {
 	signal.Notify(done, os.Interrupt)
 	<-done
 	logger.Printf("[main] exiting...\n")
+}
+
+// Exponentially fallback retrial interval to prevent abuse.
+func intervalFallback(i int) int {
+	if i >= MaxRetryInterval {
+		return i
+	} else {
+		return i * 2
+	}
 }

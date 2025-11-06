@@ -50,7 +50,7 @@ func (s *Service) CheckAllLinks() int {
 
 	upCount := 0
 	for k, v := range s.links {
-		pidBytes, err := os.ReadFile(s.cfg.Health.RunDir + "/" + v.IFName + ".pid")
+		pidBytes, err := os.ReadFile(s.cfg.Daemon.RunDir + "/" + v.IFName + ".pid")
 		if err == nil {
 			pidStr := strings.TrimSpace(string(pidBytes))
 			pid, err := strconv.Atoi(pidStr)

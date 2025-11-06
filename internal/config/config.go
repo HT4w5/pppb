@@ -11,13 +11,13 @@ import (
 
 type Config struct {
 	Links  []*LinkConfig `json:"links"`  // Link configs
-	Health *HealthConfig `json:"health"` // Link health check config
+	Daemon *DaemonConfig `json:"daemon"` // Daemon config
 }
 
 func New() *Config {
 	return &Config{
 		Links: []*LinkConfig{},
-		Health: &HealthConfig{
+		Daemon: &DaemonConfig{
 			RunDir:               "/var/run",
 			Enabled:              false, // Don't check link status by default
 			CheckInterval:        300,   // 5m
@@ -38,7 +38,7 @@ func (c *Config) Load(config string) error {
 	}
 
 	// Strip suffix
-	c.Health.RunDir = strings.TrimSuffix(c.Health.RunDir, "/")
+	c.Daemon.RunDir = strings.TrimSuffix(c.Daemon.RunDir, "/")
 
 	if err := c.validate(); err != nil {
 		return fmt.Errorf("Failed to validate config: %s, %w", config, err)
@@ -48,26 +48,26 @@ func (c *Config) Load(config string) error {
 }
 
 func (c *Config) validate() error {
-	if c.Health.Enabled {
+	if c.Daemon.Enabled {
 		// Runtime variable directory
-		_, err := os.ReadDir(c.Health.RunDir)
+		_, err := os.ReadDir(c.Daemon.RunDir)
 		if err != nil {
-			return fmt.Errorf("can't open runtime variable directory %s: %w", c.Health.RunDir, err)
+			return fmt.Errorf("can't open runtime variable directory %s: %w", c.Daemon.RunDir, err)
 		}
 
 		// Expected
-		if c.Health.Expected > len(c.Links) {
-			return fmt.Errorf("expected (%d) greater than number of links (%d)", c.Health.Expected, len(c.Links))
+		if c.Daemon.Expected > len(c.Links) {
+			return fmt.Errorf("expected (%d) greater than number of links (%d)", c.Daemon.Expected, len(c.Links))
 		}
 
 		// Intervals
-		if c.Health.CheckInterval < 0 {
-			return fmt.Errorf("invalid CheckInterval %v, must be equal to or greater than 300", c.Health.CheckInterval)
+		if c.Daemon.CheckInterval < 0 {
+			return fmt.Errorf("invalid CheckInterval %v, must be equal to or greater than 300", c.Daemon.CheckInterval)
 		}
 
-		if c.Health.ForceRestart {
-			if c.Health.ForceRestartInterval < c.Health.CheckInterval {
-				return fmt.Errorf("invalid ForceRestartInterval %v, must be equal to or greater than CheckInterval (%v)", c.Health.ForceRestartInterval, c.Health.CheckInterval)
+		if c.Daemon.ForceRestart {
+			if c.Daemon.ForceRestartInterval < c.Daemon.CheckInterval {
+				return fmt.Errorf("invalid ForceRestartInterval %v, must be equal to or greater than CheckInterval (%v)", c.Daemon.ForceRestartInterval, c.Daemon.CheckInterval)
 			}
 		}
 	}
@@ -131,9 +131,9 @@ func (c *LinkConfig) getArgs() []string {
 	}
 }
 
-type HealthConfig struct {
+type DaemonConfig struct {
 	RunDir               string `json:"run_dir"`                // Runtime variable directory where [ifname].pid exists
-	Enabled              bool   `json:"enabled"`                // Enable health check
+	Enabled              bool   `json:"enabled"`                // Enable daemon
 	Expected             int    `json:"expected"`               // Expected number of links (restart if less)
 	CheckInterval        int    `json:"check_interval"`         // Check interval in seconds
 	ForceRestart         bool   `json:"force_restart"`          // Enable force restart

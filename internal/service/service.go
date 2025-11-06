@@ -40,11 +40,11 @@ func (s *Service) init() {
 // If equal or more, return true.
 func (s *Service) CheckAndRestart() bool {
 	upCount := s.CheckAllLinks()
-	if upCount >= s.cfg.Health.Expected {
-		s.logger.Printf("[service] %d links up, satisfies expected %d\n", upCount, s.cfg.Health.Expected)
+	if upCount >= s.cfg.Daemon.Expected {
+		s.logger.Printf("[service] %d links up, satisfies expected %d\n", upCount, s.cfg.Daemon.Expected)
 		return true
 	}
-	s.logger.Printf("[service] %d links up, less than expected %d\n", upCount, s.cfg.Health.Expected)
+	s.logger.Printf("[service] %d links up, less than expected %d\n", upCount, s.cfg.Daemon.Expected)
 	s.StopAllLinks()
 	s.StartAllPPPTasks()
 	return false
