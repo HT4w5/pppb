@@ -9,14 +9,17 @@ import (
 )
 
 type Config struct {
-	Links  []*LinkConfig `json:"links"`
-	RunDir string        `json:"run_dir"`
+	Links  []*LinkConfig `json:"links"`  // Link configs
+	Health *HealthConfig `json:"health"` // Link health check config
 }
 
 func New() *Config {
 	return &Config{
-		Links:  []*LinkConfig{},
-		RunDir: "/var/run",
+		Links: []*LinkConfig{},
+		Health: &HealthConfig{
+			RunDir:  "/var/run",
+			Enabled: false, // Don't check link status by default
+		},
 	}
 }
 
@@ -38,11 +41,25 @@ func (c *Config) Load(config string) error {
 }
 
 func (c *Config) validate() error {
-	// Runtime variable directory
-	_, err := os.ReadDir(c.RunDir)
-	if err != nil {
-		return fmt.Errorf("Can't open runtime variable directory %s: %w", c.RunDir, err)
+	if c.Health.Enabled {
+		// Runtime variable directory
+		_, err := os.ReadDir(c.Health.RunDir)
+		if err != nil {
+			return fmt.Errorf("Can't open runtime variable directory %s: %w", c.Health.RunDir, err)
+		}
+
+		// Intervals
+		if c.Health.CheckInterval < 300 {
+			return fmt.Errorf("Invalid CheckInterval %v, must be equal to or greater than 300", c.Health.CheckInterval)
+		}
+
+		if c.Health.ForceRestart {
+			if c.Health.ForceRestartInterval < c.Health.CheckInterval {
+				return fmt.Errorf("Invalid ForceRestartInterval %v, must be equal to or greater than CheckInterval (%v)", c.Health.ForceRestartInterval, c.Health.CheckInterval)
+			}
+		}
 	}
+
 	// Links
 	for _, cc := range c.Links {
 		if len(cc.Tag) == 0 {
@@ -84,4 +101,12 @@ func (c *LinkConfig) getArgs() []string {
 		"ifname",
 		c.IFName,
 	}
+}
+
+type HealthConfig struct {
+	RunDir               string `json:"run_dir"`                // Runtime variable directory where [ifname].pid exists
+	Enabled              bool   `json:"enabled"`                // Enable health check
+	CheckInterval        int    `json:"check_interval"`         // Check interval in seconds
+	ForceRestart         bool   `json:"force_restart"`          // Enable force restart
+	ForceRestartInterval int    `json:"force_restart_interval"` // Force restart interval in seconds
 }
