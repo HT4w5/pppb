@@ -17,8 +17,11 @@ func New() *Config {
 	return &Config{
 		Links: []*LinkConfig{},
 		Health: &HealthConfig{
-			RunDir:  "/var/run",
-			Enabled: false, // Don't check link status by default
+			RunDir:               "/var/run",
+			Enabled:              false, // Don't check link status by default
+			CheckInterval:        300,   // 5m
+			ForceRestart:         false,
+			ForceRestartInterval: 86400, // 1d
 		},
 	}
 }
@@ -106,6 +109,7 @@ func (c *LinkConfig) getArgs() []string {
 type HealthConfig struct {
 	RunDir               string `json:"run_dir"`                // Runtime variable directory where [ifname].pid exists
 	Enabled              bool   `json:"enabled"`                // Enable health check
+	Expected             int    `json:"expected"`               // Expected number of links (restart if less)
 	CheckInterval        int    `json:"check_interval"`         // Check interval in seconds
 	ForceRestart         bool   `json:"force_restart"`          // Enable force restart
 	ForceRestartInterval int    `json:"force_restart_interval"` // Force restart interval in seconds
