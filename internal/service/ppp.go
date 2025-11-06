@@ -9,6 +9,8 @@ import (
 	"github.com/HT4w5/pppcm/internal/model"
 )
 
+// Concurrently run pppd to start all links.
+// Returns number of successful calls to pppd.
 func (s *Service) StartAllPPPTasks() int {
 	s.logger.Println("[main] Starting all pppd tasks")
 
@@ -39,6 +41,8 @@ func (s *Service) StartAllPPPTasks() int {
 	return successCount
 }
 
+// Look at pppd PID files to see whether links are up.
+// Return number of links up.
 func (s *Service) CheckAllLinks() int {
 	s.logger.Println("[main] Checking all ppp links")
 
@@ -64,6 +68,8 @@ func (s *Service) CheckAllLinks() int {
 	return upCount
 }
 
+// Runs pppd to start a link.
+// Returns a PPPResult.
 func runPPPTask(task model.PPPTask, startSignal <-chan struct{}, results chan<- model.PPPResult) {
 	// Block until start signal
 	<-startSignal
