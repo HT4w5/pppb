@@ -2,10 +2,25 @@ package main
 
 import (
 	"fmt"
+	"runtime"
 
 	"github.com/HT4w5/pppcm/internal/config"
-	"github.com/HT4w5/pppcm/internal/service"
 )
+
+const (
+	VersionX = 0
+	VersionY = 0
+	VersionZ = 1
+	Build    = "unknown"
+)
+
+func Version() string {
+	return fmt.Sprintf("%v.%v.%v", VersionX, VersionY, VersionZ)
+}
+
+func VersionLine() string {
+	return fmt.Sprintf("pppcm %s %s (%s %s/%s)", Version(), Build, runtime.Version(), runtime.GOOS, runtime.GOARCH)
+}
 
 func main() {
 	cfg := config.New()
@@ -14,7 +29,9 @@ func main() {
 		return
 	}
 
-	svc := service.New(cfg)
-	//svc.StartAllPPPTasks()
-	svc.CheckAllLinks()
+	fmt.Println(VersionLine())
+
+	//svc := service.New(cfg)
+
+	//sch := gocron.NewScheduler()
 }
