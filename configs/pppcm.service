@@ -1,0 +1,17 @@
+[Unit]
+Description=PPPCM
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/opt/pppcm
+ExecStart=/opt/pppcm/pppcm
+StandardOutput=journal
+StandardError=journal
+Restart=always
+RestartSec=5
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target

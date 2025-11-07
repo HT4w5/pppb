@@ -1,0 +1,33 @@
+{
+    "links": [
+        {
+            "tag": "isp0",
+            "ttyname": "eth0",
+            "user": "<user>",
+            "password": "<password>",
+            "ifname": "ppp0"
+        },
+        {
+            "tag": "isp1",
+            "ttyname": "eth1",
+            "user": "<user>",
+            "password": "<password>",
+            "ifname": "ppp1"
+        },
+        {
+            "tag": "isp2",
+            "ttyname": "eth2",
+            "user": "<user>",
+            "password": "<password>",
+            "ifname": "ppp2"
+        }
+    ],
+    "daemon": {
+        "run_dir": "/var/run",
+        "expected": 3,
+        "enabled": true,
+        "check_interval": 300,
+        "force_restart": false,
+        "force_restart_interval": 86400
+    }
+}
