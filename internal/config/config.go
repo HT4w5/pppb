@@ -61,7 +61,7 @@ func (c *Config) validate() error {
 		}
 
 		// Intervals
-		if c.Daemon.CheckInterval < 0 {
+		if c.Daemon.CheckInterval < 300 {
 			return fmt.Errorf("invalid CheckInterval %v, must be equal to or greater than 300", c.Daemon.CheckInterval)
 		}
 

@@ -58,6 +58,7 @@ func main() {
 
 	// Daemon enabled
 	logger.Printf("[main] daemon enabled\n")
+	// Start all links
 	i := MinRetryInterval
 	for !svc.CheckAndRestart() {
 		logger.Printf("[main] (re)checking in %ds\n", i)
@@ -66,10 +67,12 @@ func main() {
 	}
 	logger.Printf("[main] start success. Checking in %ds\n", cfg.Daemon.CheckInterval)
 
+	// Set check ticker
 	checkInterval := time.Duration(cfg.Daemon.CheckInterval) * time.Second
 	checkTicker := time.NewTicker(checkInterval)
 	done := make(chan os.Signal, 1)
 
+	// No force restart
 	if !cfg.Daemon.ForceRestart {
 		go func() {
 			for {
@@ -88,10 +91,11 @@ func main() {
 				}
 			}
 		}()
-	} else {
+	} else { // With force restart
 		forceRestartInterval := time.Duration(cfg.Daemon.ForceRestartInterval) * time.Second
 		forceRestartTicker := time.NewTicker(forceRestartInterval)
 		go func() {
+			// Time of last restart
 			restart := time.Now()
 			for {
 				select {
