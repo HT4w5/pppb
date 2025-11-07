@@ -20,6 +20,12 @@ const (
 
 	MinRetryInterval = 10   // 10s
 	MaxRetryInterval = 1200 // 2m
+	Banner           = `██████╗ ██████╗ ██████╗  ██████╗███╗   ███╗
+██╔══██╗██╔══██╗██╔══██╗██╔════╝████╗ ████║
+██████╔╝██████╔╝██████╔╝██║     ██╔████╔██║
+██╔═══╝ ██╔═══╝ ██╔═══╝ ██║     ██║╚██╔╝██║
+██║     ██║     ██║     ╚██████╗██║ ╚═╝ ██║
+╚═╝     ╚═╝     ╚═╝      ╚═════╝╚═╝     ╚═╝`
 )
 
 func Version() string {
@@ -31,6 +37,7 @@ func VersionLine() string {
 }
 
 func main() {
+	fmt.Println(Banner)
 	fmt.Println(VersionLine())
 	cfg := config.New()
 	if err := cfg.Load("config.json"); err != nil {
